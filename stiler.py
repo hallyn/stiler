@@ -179,7 +179,7 @@ def raise_window(windowid):
     if windowid == ":ACTIVE:":
         command = "wmctrl -a :ACTIVE: "
     else:
-        command - "wmctrl -i -a " + windowid
+        command = "wmctrl -i -a " + windowid
     
     os.system(command)
 
@@ -270,6 +270,30 @@ def cycle():
     winlist = winlist[:-1]
     arrange(get_simple_tile(len(winlist)),winlist)
 
+def focus_next():
+    Windows = create_win_list()
+    # we need to find which window is the active one
+    # then pick the next one
+    # for now just pick the second window always
+    active = get_active_window()
+    found = 0
+    for win in Windows:
+	    if found == 1:
+		    raise_window(win)
+		    return
+	    if win == active:
+		    found = 1
+    raise_window(Windows[0])
+
+def focus_prev():
+    Windows = create_win_list()
+    active = get_active_window()
+    prev = Windows[len(Windows)-1]
+    for win in Windows:
+	    if win == active:
+		    raise_window(prev)
+            prev = win
+
 
 def maximize():
     Width=MaxWidth
@@ -304,6 +328,10 @@ elif sys.argv[1] == "cycle":
     cycle()
 elif sys.argv[1] == "maximize":
     maximize()
+elif sys.argv[1] == "next":
+    focus_next()
+elif sys.argv[1] == "prev":
+    focus_prev()
 elif sys.argv[1] == "max_all":
     max_all()
 
