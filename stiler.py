@@ -44,6 +44,12 @@ TempFile = /tmp/tile_winlist
     config.read(rcfile)
     return config
 
+def get_screen_size():
+    s = commands.getoutput('''xdpyinfo | grep 'dimension' | awk -F: '{ print $2 }' | awk '{ print $1 }' ''')
+    (x,y) = s.split('x')
+    return (int(x), int(y))
+
+(resx, resy) = get_screen_size()
 
 def initialize():
     desk_output = commands.getoutput("wmctrl -d").split("\n")
@@ -56,15 +62,32 @@ def initialize():
     height =  current[8].split("x")[1]
     orig_x =  current[7].split(",")[0]
     orig_y =  current[7].split(",")[1]
+    (resx, resy) = get_screen_size()
 
     win_output = commands.getoutput("wmctrl -lG").split("\n")
     win_list = {}
 
+    win_filtered = []
+    for win in win_output:
+	w = win.split()
+	x = int(w[2])
+	y = int(w[3])
+	if x < 0 or x > resx:
+		continue
+	if y < 0 or y > resy:
+		continue
+	if w[7] == '<unknown>':
+		continue
+	if w[6] == 'N/A':
+		continue
+	if w[7] == 'x-nautilus-desktop':
+		continue
+	win_filtered.append(win)
+
     for desk in desk_list:
-        win_list[desk] = map(lambda y: hex(int(y.split()[0],16)) , filter(lambda x: x.split()[1] == desk, win_output ))
+        win_list[desk] = map(lambda y: hex(int(y.split()[0],16)) , filter(lambda x: x.split()[1] == desk, win_filtered ))
 
     return (desktop,orig_x,orig_y,width,height,win_list)
-
 
 def get_active_window():
     return str(hex(int(commands.getoutput("xdotool getactivewindow 2>/dev/null").split()[0])))
@@ -105,7 +128,6 @@ MaxHeight = int(MaxHeightStr) - TopPadding - BottomPadding
 OrigX = int(OrigXstr) + LeftPadding
 OrigY = int(OrigYstr) + TopPadding 
 OldWinList = retrieve(TempFile)
-
 
 def get_simple_tile(wincount):
     rows = wincount - 1
