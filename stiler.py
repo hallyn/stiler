@@ -357,10 +357,7 @@ def old_max_all():
 # this way unity can remove the title bar
 def max_all():
     winlist = create_win_list()
-    active = get_active_window()
-    winlist.remove(active)
-    winlist.insert(0,active)
-    for win , lay  in zip(windows,layout):
+    for win in winlist:
         maximize_one(win)
 
 if sys.argv[1] == "left":
