@@ -72,9 +72,9 @@ def initialize():
 	w = win.split()
 	x = int(w[2])
 	y = int(w[3])
-	if x < 0 or x > resx:
+	if x < 0 or x >= resx:
 		continue
-	if y < 0 or y > resy:
+	if y < 0 or y >= resy:
 		continue
 	if w[7] == '<unknown>':
 		continue
