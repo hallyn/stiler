@@ -190,7 +190,20 @@ def move_active(PosX,PosY,Width,Height):
     os.system(command)
 
 
+def unmaximize_one(windowid):
+    command =  " wmctrl -i -r " + windowid +  " -bremove,maximized_vert,maximized_horz"
+    os.system(command)
+
+
+def maximize_one(windowid):
+    command =  " wmctrl -i -r " + windowid +  " -badd,maximized_vert,maximized_horz"
+    os.system(command)
+
+
 def move_window(windowid,PosX,PosY,Width,Height):
+    # Unmaximize window
+    unmaximize_one(windowid)
+    # Now move it
     command =  " wmctrl -i -r " + windowid +  " -e 0," + str(PosX) + "," + str(PosY)+ "," + str(Width) + "," + str(Height)
     os.system(command)
     command = "wmctrl -i -r " + windowid + " -b remove,hidden,shaded"
@@ -264,6 +277,10 @@ def simple():
 
 def swap():
     winlist = create_win_list()
+    if len(winlist) == 1:
+        # only one window, maximize it
+        maximize_active()
+        return
     active = get_active_window()
     winlist.remove(active)
     winlist.insert(0,active)
@@ -317,6 +334,10 @@ def focus_prev():
             prev = win
 
 
+def maximize_active():
+    os.system("wmctrl -r :ACTIVE: -badd,maximized_vert,maximized_horz")
+
+
 def maximize():
     Width=MaxWidth
     Height=MaxHeight - WinTitle -WinBorder
@@ -325,14 +346,22 @@ def maximize():
     move_active(PosX,PosY,Width,Height)
     raise_window(":ACTIVE:")
 
-def max_all():
+def old_max_all():
     winlist = create_win_list()
     active = get_active_window()
     winlist.remove(active)
     winlist.insert(0,active)
     arrange(get_max_all(len(winlist)),winlist)
 
-
+# new max_all(), use real 'maximize'
+# this way unity can remove the title bar
+def max_all():
+    winlist = create_win_list()
+    active = get_active_window()
+    winlist.remove(active)
+    winlist.insert(0,active)
+    for win , lay  in zip(windows,layout):
+        maximize_one(win)
 
 if sys.argv[1] == "left":
     left()
